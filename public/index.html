@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>공연 끝, 귀갓길</title>
+  <meta name="description" content="KSPO DOME 공연 뒤 탈 곳을 찾는 귀가 안내 (공모전 시연용)">
+  <meta name="theme-color" content="#14284b">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <div class="mode-line" id="modeLine">시연 모드 · 2025년 11월 1일 기준</div>
+    <div class="mode-switch" role="group" aria-label="모드">
+      <button type="button" data-mode="demo" aria-pressed="true">시연</button>
+      <button type="button" data-mode="live" aria-pressed="false">실시간</button>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="site-foot">
+    <p>공모전 시연용 화면입니다. 도보 거리는 지도 경로 기반 추정이며 현장 실측이 아닙니다.</p>
+    <p>데이터: 한국체육산업개발 · 서울특별시 버스도착정보 · 서울시 노선별 정류소 · 지도 © OpenStreetMap 기여자</p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
