@@ -6,6 +6,21 @@ KSPO DOME 공연이 끝난 뒤 한얼광장 ‘88서울올림픽’ 조각 앞�
 - 시연 회차: 2025-11-01(토) 18:00 KSPO DOME ‘IVE WORLD TOUR [SHOW WHAT I AM]’ 서울 2회차 (같은 시각 올림픽홀 신승훈 공연)
 - 방면: 버스 3214 마천동(정류소 24244) · 강변역(24245) / 지하철 올림픽공원역 4번 출구 · 한성백제역 2번 출구(혼잡 시)
 
+## 현재 상태 (2026-11-24)
+
+- 배포: **아직 안 함.** 로그인된 Cloudflare 계정을 쓸지 확인 중. 배포 주소가 나오면 여기와 `../소스/진행상황.md`에 적는다.
+- 확인함: 375px에서 1→2→3 흐름과 네 방면 카드, 시연 상황 4가지(기본·서두르면 가능·막차 이후·조회 실패), 로컬에서 `/api/bus`가 서울시 API를 실제로 호출함(새벽이라 '운행종료' 응답만 확인).
+- 아직 안 함: 실제 휴대폰 확인, 도착 시간이 있는 실시간 응답 확인, 출차 그래프 실제 데이터(`exit_counts.json` 없음 → '집계 준비 중' 표시).
+- 서비스 이름은 가칭 '공연 끝, 귀갓길'. 정해지면 `public/index.html`의 `<title>`을 바꾼다.
+
+## 캡처 (`screenshots/`, 375px · 2배율)
+
+| 파일 | 내용 |
+| --- | --- |
+| `01_공연선택.png` · `02_방면선택.png` · `03_버스카드.png` · `04_지하철카드.png` | 기획서용 4장 |
+| `상태_첫버스놓침.png` · `상태_서두르면가능.png` · `상태_막차이후.png` · `상태_조회실패.png` | 버스 판정·오류 상태 |
+| `지하철_한성백제역.png` · `자가용_준비중.png` | 기타 화면 |
+
 ## 화면과 주소
 
 | 주소 | 화면 |
@@ -46,7 +61,7 @@ web/
 ├─ functions/api/bus.js    Pages Function: 서울시 버스 API 대리 호출, 정류장별 30초 캐시
 ├─ scripts/
 │  ├─ make_exit_counts.py  출차_10분_게이트별.csv → exit_counts.json
-│  └─ screenshots.mjs      375px 캡처 (screenshots/)
+│  └─ screenshots.mjs      375px 캡처 (screenshots/, 크롬 DevTools 프로토콜)
 └─ screenshots/            기획서용 캡처
 ```
 
@@ -65,7 +80,7 @@ python3 -m http.server 8788 --directory public
 npm run dev                 # http://localhost:8788
 ```
 
-캡처 다시 찍기: 로컬 서버를 띄운 상태에서 `npm run shots` (Google Chrome 필요).
+캡처 다시 찍기: 로컬 서버(http://127.0.0.1:8788)를 띄운 상태에서 `npm run shots` (Google Chrome 필요, 지도 타일이 뜰 때까지 기다렸다 찍음).
 
 ## 배포 (Cloudflare Pages + Functions, 무료 요금제)
 
