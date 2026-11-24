@@ -1,0 +1,79 @@
+/* 디자인 변수 — 화면 코드에서는 여기 이름만 쓴다. 설명은 README '디자인 변수'.
+ * 다크가 기본값, 라이트는 기기 설정(prefers-color-scheme)에 따라 바꾼다. */
+:root {
+  color-scheme: dark;
+
+  /* 무채색 */
+  --bg: #0d0d0d;            /* 시트 바탕 */
+  --surface: #1c1c1c;       /* 눌린·고른 줄, 상단 띠 */
+  --surface-2: #3a3a3a;     /* 도보 막대, 칩 */
+  --line: #2e2e2e;          /* 구분선 */
+  --line-strong: #ffffff;   /* 고른 줄 테두리 */
+  --text: #ffffff;
+  --text-2: #b4b4b4;
+  --text-3: #8f8f8f;
+  --btn-bg: #ffffff;        /* 주요 버튼: 바탕과 반대색 하나 */
+  --btn-text: #000000;
+
+  /* 강조색 하나: 지선버스 초록 */
+  --bus: #1e7909;           /* 서울시 버스 웹(bus.go.kr) '지선' 표시값 */
+  --bus-on: #ffffff;        /* 초록 위 글자 */
+  --bus-text: #6bd451;      /* 어두운 바탕 위 초록 글자·선(같은 색상 110도, 밝기만 올림) */
+
+  /* 지하철 노선 표시(배지에만) */
+  --line5: #996cac;  --line5-on: #ffffff;
+  --line9: #bdb092;  --line9-on: #111111;
+
+  /* 지도 */
+  --map-land: #191a19;
+  --map-park: #1d221c;
+  --map-green: #20271f;
+  --map-pitch: #242a23;
+  --map-square: #262625;
+  --map-water: #10181c;
+  --map-bldg: #262726;
+  --map-venue: #4a4b4a;
+  --map-road-a: #3b3c3b;
+  --map-road-b: #343534;
+  --map-road-c: #2c2d2c;
+  --map-road-f: #2b2d2a;
+  --map-label: #a0a0a0;
+  --map-halo: #141514;
+  --walk: #ffffff;          /* 도보 점선 */
+  --walk-case: #000000;
+
+  /* 글자: Pretendard, 숫자는 tabular-nums */
+  --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --fs-eta: 44px;           /* 도착까지 남은 분 */
+  --fs-title: 22px;
+  --fs-cta: 18px;
+  --fs-body: 16px;
+  --fs-sub: 14px;
+  --fs-note: 12px;
+  --fw-regular: 400;  --fw-medium: 500;  --fw-bold: 700;  --fw-heavy: 800;
+  --lh-tight: 1.15;   --lh-body: 1.4;
+
+  /* 간격: 4px 배수 */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px;  --sp-4: 16px;  --sp-5: 20px;  --sp-6: 24px;
+  --gutter: 16px;
+
+  /* 모양 */
+  --r-sheet: 20px;  --r-row: 14px;  --r-btn: 12px;  --r-badge: 6px;
+  --tap: 48px;              /* 누르는 곳 최소 높이 */
+  --cta-h: 56px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #ffffff;  --surface: #f4f4f4;  --surface-2: #e6e6e6;  --line: #e4e4e4;  --line-strong: #000000;
+    --text: #000000;  --text-2: #5c5c5c;  --text-3: #6b6b6b;
+    --btn-bg: #000000;  --btn-text: #ffffff;
+    --bus-text: #1e7909;
+    --map-land: #f1f1ef;  --map-park: #e3eae0;  --map-green: #d9e4d5;  --map-pitch: #cfdcca;  --map-square: #e9e9e6;
+    --map-water: #cfdde3;  --map-bldg: #e2e2e0;  --map-venue: #a9aaa8;
+    --map-road-a: #ffffff;  --map-road-b: #ffffff;  --map-road-c: #fbfbfa;  --map-road-f: #f6f7f4;
+    --map-label: #575757;  --map-halo: #ffffff;
+    --walk: #000000;  --walk-case: #ffffff;
+  }
+}
