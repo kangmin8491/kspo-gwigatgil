@@ -29,6 +29,7 @@ const SHOTS = [
   ['라이트_방면선택.png', '#/', 'light'],
   ['라이트_버스_마천동.png', '#/go/bus-machon', 'light'],
   ['라이트_버스_길어느쪽.png', '#/go/bus-machon', 'light', 0],
+  ['작은화면_방면선택.png', '#/', 'dark', null, 360, 640],
   ['작은화면_버스.png', '#/go/bus-machon', 'dark', null, 360, 640],
   ['넓은화면_버스.png', '#/go/bus-machon', 'dark', null, 1280, 800],
 ];

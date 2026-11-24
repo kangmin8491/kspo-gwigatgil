@@ -349,7 +349,7 @@
     clock(); setDown(0);
     if (view === 'home') home(); else if (view === 'go') go(opts[sel]); else if (view === 'event') eventView(); else car();
     $('view').scrollTop = 0;
-    cta(); fit(true);
+    cta(); fit();
     if (moved === true) { var t = $('view').querySelector('h1'); if (t) t.focus({ preventScroll: true }); }
   }
   addEventListener('hashchange', function () { route(true); });
@@ -357,7 +357,7 @@
     var t = e.target.closest('[data-i],[data-go],[data-sc],[data-retry],[data-gate]'); if (!t) return;
     var d = t.dataset;
     if (d.go) nav(d.go);
-    else if (d.i != null) { sel = +d.i; list(); cta(); fit(true); $('list').children[sel].scrollIntoView({ block: 'nearest' }); }
+    else if (d.i != null) { sel = +d.i; list(); cta(); fit(); $('list').children[sel].scrollIntoView({ block: 'nearest' }); }
     else if (d.sc) {
       sc = d.sc; params(); clock(); update(); cta();
       $('view').querySelectorAll('[data-sc]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.sc === sc)); });
@@ -376,7 +376,7 @@
     $('view').style.visibility = folded ? 'hidden' : '';
     $('grip').setAttribute('aria-expanded', String(!folded));
   }
-  function fold(on) { setDown(on ? closedAt() : 0); cta(); fit(true); }
+  function fold(on) { setDown(on ? closedAt() : 0); cta(); fit(); }
   (function () {
     var g = $('grip'), y0 = null, b0 = 0, moved = false, wasKey = true;
     g.addEventListener('pointerdown', function (e) { y0 = e.clientY; b0 = down; moved = false; wasKey = false; g.setPointerCapture(e.pointerId); $('sheet').classList.add('drag'); });
@@ -413,7 +413,8 @@
     drawBase();
     map.on('zoomend', function () { base.eachLayer(function (l) { if (l.mw) l.setStyle({ weight: px(l.mw) }); }); overlay(); });
     matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () { drawBase(); overlay(); });
-    addEventListener('resize', function () { setDown(folded ? closedAt() : 0); fit(false); });
+    addEventListener('resize', function () { setDown(folded ? closedAt() : 0); fit(); });
+    if (window.ResizeObserver) new ResizeObserver(function () { if (!$('sheet').classList.contains('drag')) fit(); }).observe($('sheet'));
   }
   function drawBase() {
     if (base) base.remove();
@@ -478,14 +479,18 @@
       mark(e, 'm-tag plain at-b', x.name + ' ' + x.exit).addTo(over);
     }
   }
-  function fit(anim) {
-    if (!map) return;
+  // 출발점~목적지가 상단 띠와 시트 사이에 들어오게 맞춘다.
+  // 애니메이션을 쓰지 않는다: 가려진 탭에서는 끝나지 않아 지도가 처음 위치에 남는다.
+  function fit() {
+    if (!map || !opts.length) return;
+    map.stop();
+    map.invalidateSize({ animate: false, pan: false });
     var x = opts[sel], b = L.latLngBounds(x.line.map(ll)), wide = innerWidth >= 768, s = $('sheet');
     if (x.kind === 'bus') b.extend(ST.machon).extend(ST.gangbyeon).extend(heading(x.k)[1]);
     var sh = s.offsetHeight - down;
     if (!wide) sh = Math.min(sh, innerHeight * .7);
     map.getContainer().querySelector('.leaflet-bottom').style.cssText = wide ? 'left:440px' : 'bottom:' + sh + 'px';
-    map.fitBounds(b, { animate: anim, paddingTopLeft: [wide ? 520 : 92, 112], paddingBottomRight: [wide ? 80 : x.kind === 'bus' ? 116 : 84, wide ? 40 : sh + (x.kind === 'bus' ? 30 : 54)] });
+    map.fitBounds(b, { animate: false, paddingTopLeft: [wide ? 520 : 92, 112], paddingBottomRight: [wide ? 80 : x.kind === 'bus' ? 116 : 84, wide ? 40 : sh + (x.kind === 'bus' ? 30 : 54)] });
     overlay();
   }
 })();
