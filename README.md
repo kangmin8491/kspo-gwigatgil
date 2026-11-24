@@ -8,7 +8,7 @@ KSPO DOME 공연이 끝난 뒤 한얼광장 ‘88서울올림픽’ 조각 앞�
 
 ## 현재 상태 (2026-11-24)
 
-- 배포: **아직 안 함.** 로그인된 Cloudflare 계정을 쓸지 확인 중. 배포 주소가 나오면 여기와 `../소스/진행상황.md`에 적는다.
+- 배포: **아직 안 함.** 이 맥의 기본 wrangler 로그인은 다른 사람 계정으로 연결되므로 쓰지 않는다. 배포는 `kspo` 프로필(사용자 본인 계정)로만 한다. 배포 주소가 나오면 여기와 `../소스/진행상황.md`에 적는다.
 - 확인함: 새 디자인의 네 방면·공연·출차 화면, 시연 상황 4가지, 다크·라이트, 375×812·360×640·1280×800(크롬 헤드리스). 화면 이동·뒤로 가기·시트 접기(누르기·키보드)·모드 전환. 2026-11-24 13:27에 도착 시간이 있는 실시간 응답(마천동 5·35분, 강변역 11·20분)이 화면에 나옴(Pages 대신 시험용 Node 서버로 함수 실행).
 - 아직 안 함: 실제 휴대폰 확인, 배포 환경에서의 실시간 확인, 출차 그래프 실제 데이터(`exit_counts.json` 없음 → ‘집계 준비 중’. 그래프는 시험용 가짜 자료로만 확인).
 - 서비스 이름은 가칭 ‘공연 끝, 귀갓길’. 정해지면 `public/index.html`의 `<title>`을 바꾼다.
@@ -131,9 +131,11 @@ npm run dev                 # http://localhost:8788
 
 ```sh
 cd web
-npx wrangler login                         # 처음 한 번, 브라우저에서 Cloudflare 계정 로그인
+npx wrangler auth create kspo               # 처음 한 번. 브라우저 승인 화면에서 본인 계정을 고른다
+npx wrangler auth activate kspo             # web/ 폴더에서는 이 프로필을 쓰게 묶는다
+npx wrangler whoami                         # 본인 계정 이름이 나오는지 확인
 npm run deploy                             # 프로젝트 kspo-gwigatgil 로 public/ + functions/ 업로드
-npx wrangler pages secret put SEOUL_BUS_SERVICE_KEY --project-name kspo-gwigatgil
+npx wrangler pages secret put SEOUL_BUS_SERVICE_KEY --project-name kspo-gwigatgil --profile kspo
                                            # 입력창에 키를 붙여 넣는다 (명령줄·로그에 남지 않음)
 npm run deploy                             # 비밀값 반영을 위해 한 번 더 배포
 ```

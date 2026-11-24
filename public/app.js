@@ -45,9 +45,9 @@
     });
     var p = D.s.paths, so = D.r.subway_options;
     opts.push(
-      // 원자료는 역 중심점까지다. 지도에는 4번 출구(OSM node 8227072104)까지만 그린다.
+      // 경로선 자료는 역 중심점까지다. 지도에는 4번 출구(OSM node 8227072104)까지만 그린다.
       { id: 'subway-olympic', kind: 'sub', name: '올림픽공원역', exit: '4번 출구', lines: ['5', '9'], walk: so[0].walking_minutes_estimate, m: so[0].walking_m_estimate, o: so[0],
-        line: p['subway-olympic'].walking_polyline_lon_lat.slice(0, 15).concat([[127.130784, 37.516432]]) },
+        line: p['subway-olympic'].walking_polyline_lon_lat.slice(0, 15).concat([so[0].exit_coordinate_lon_lat]) },
       { id: 'subway-hanseong', kind: 'sub', name: '한성백제역', exit: '2번 출구', lines: ['9'], crowd: true, walk: so[1].walking_minutes_estimate, m: so[1].walking_m_estimate, o: so[1],
         line: p['subway-hanseong'].walking_polyline_lon_lat });
     if (mode === 'demo' && SC[sc].ended) sel = 2;
@@ -150,9 +150,10 @@
     h += '<span class="name"><span class="badge">3214</span>' + esc(x.o.direction) + ' 방면</span><span class="sub">' +
       (on ? '정류소 <b>' + x.o.ars_id + '</b> · ' + BUS[x.k].short + '<br>다음 정류장 ' + esc(x.o.next_stop)
         : a.f === 1 && a.buses[0].min != null ? '앞차 ' + a.buses[0].min + '분은 놓칠 수 있음' : '도보 ' + x.walk + '분 → 정류소 ' + x.o.ars_id) + '</span></span>';
-    if (b && b.min != null) h += num(b.min < 1 ? '곧' : b.min, b.min < 1 ? '' : '분', eg() + '<span class="' + b.cls + '">' + b.text + '</span>' + (b.isLast ? ' · 막차' : ''));
+    if (b && b.min != null) h += num(b.min < 1 ? '곧' : b.min, b.min < 1 ? '' : '분', (on ? '버스 ' + (b.min < 1 ? '곧 도착' : b.min + '분 뒤 도착') + '<br>' : '') + eg() + '<span class="' + b.cls + '">' + b.text + '</span>' + (b.isLast ? ' · 막차' : ''));
     else h += '<span class="num"><span class="u">' + ({ ended: '운행 종료', fail: '조회 불가', load: '조회 중' }[a.status] || esc((b && b.msg) || '도착 정보 없음')) + '</span><span class="t">' + (a.last ? '막차 ' + a.last : '') + '</span></span>';
-    if (on) h += bar(x, b && b.min != null && b.cls !== 'miss' ? b : null) + (a.f === 1 && a.buses[0].min != null ? '<span class="miss1">앞차 ' + a.buses[0].min + '분은 걷는 동안 지나갈 수 있습니다</span>' : '');
+    if (on) h += bar(x, b && b.min != null && b.cls !== 'miss' ? b : null) + (a.f === 1 && a.buses[0].min != null ? '<span class="miss1">앞차 ' + a.buses[0].min + '분은 걷는 동안 지나갈 수 있습니다</span>' : '') +
+      (a.last && b && b.min != null ? '<span class="miss1">막차 <b>' + a.last + '</b> · ' + a.lastNote + '</span>' : '');
     return h + '</button>';
   }
   function list() {
@@ -181,7 +182,7 @@
       '<button type="button" data-go="#/go/subway-hanseong">한성백제역 가는 길</button>' + link(METRO, '지하철 막차 확인') + '</p>' + last;
     if (!a.buses.length) return '<p class="state">도착 예정 버스 없음</p>' + last;
     h += '<div class="etas">' + a.buses.map(function (b, i) {
-      return '<div class="eta ' + b.cls + (i === a.f || (a.f < 0 && i === 0 && b.min == null) ? ' on' : '') + '"><span class="k">' + (i ? '다음 버스' : '첫 버스') + (b.isLast ? ' · 막차' : '') + (mode === 'demo' ? ' · 예시' : '') + '</span>' +
+      return '<div class="eta ' + b.cls + (i === a.f || (a.f < 0 && i === 0 && b.min == null) ? ' on' : '') + '"><span class="k">' + (i ? '다음 버스' : '첫 버스') + ' 도착' + (b.isLast ? ' · 막차' : '') + (mode === 'demo' ? ' · 예시' : '') + '</span>' +
         (b.min == null ? '<span class="u">' + esc(b.msg || '정보 없음') + '</span>' : '<span class="n">' + (b.min < 1 ? '곧' : b.min) + '</span>' + (b.min < 1 ? '' : '<span class="u">분</span>')) +
         '<span class="v ' + b.cls + '">' + b.text + '</span></div>';
     }).join('') + '</div>';
@@ -209,7 +210,7 @@
       h += '<h1 class="route" tabindex="-1">' + x.lines.map(badge).join('') + x.name + '</h1>' +
         '<section class="block first"><div class="etas"><div class="eta on"><span class="k">걸어서</span><span class="n">' + x.walk + '</span><span class="u">분</span></div>' +
           '<div class="eta"><span class="k">들어가는 곳</span><span class="n">' + x.exit.charAt(0) + '</span><span class="u">번 출구</span></div></div>' + bar(x) +
-          '<p class="small">약 ' + (x.m >= 1000 ? (x.m / 1000).toFixed(1) + 'km' : x.m + 'm') + '. ' + (oly ? '역 중심점까지의 지도 경로 추정입니다.' : '2번 출구 인근까지의 지도 경로 추정입니다. 예매처 안내는 약 20분입니다.') + '</p></section>';
+          '<p class="small">약 ' + (x.m >= 1000 ? (x.m / 1000).toFixed(1) + 'km' : x.m + 'm') + '. ' + (oly ? '4번 출구까지의 지도 경로 추정입니다.' : '2번 출구 인근까지의 지도 경로 추정입니다. 예매처 안내는 약 20분입니다.') + '</p></section>';
       if (oly) h += '<section class="block"><h2>길 어느 쪽으로 들어가나요</h2>' + road('exit4') + '<p class="note"><b>4번 출구</b>는 공원 쪽에 있습니다. 양재대로를 건너지 않습니다.</p></section>' +
         '<section class="block"><h2>5호선은 행선지를 확인하세요</h2><p class="note">5호선은 강동역에서 마천 방면과 하남 방면으로 갈라집니다. 타기 전에 열차 행선지를 확인하세요.</p></section>';
       else h += '<section class="block"><h2>올림픽공원역이 붐빌 때</h2><p class="note">예매처 공연장 안내는 공연 직후 올림픽공원역 혼잡을 피하려면 한성백제역이나 몽촌토성역을 권합니다.</p></section>';
@@ -450,7 +451,7 @@
     var x = opts[sel], path = x.line.map(ll), z = map.getZoom();
     mark([37.51915, 127.12735], 'm-text venue', 'KSPO DOME').addTo(over);
     mark([37.5199, 127.1330], 'm-text road', '양재대로').addTo(over);
-    mark([37.5161, 127.1272], 'm-text', '올림픽홀').addTo(over);
+    mark([37.5161, 127.1272], 'm-text', '올림픽홀').setZIndexOffset(-1000).addTo(over);
     // 도보 점선
     var sv = L.svg({ padding: 0.5 });
     L.polyline(path, { renderer: sv, color: css('--walk-case'), weight: 9, opacity: .55, lineCap: 'round', interactive: false }).addTo(over);
@@ -482,9 +483,9 @@
     var x = opts[sel], b = L.latLngBounds(x.line.map(ll)), wide = innerWidth >= 768, s = $('sheet');
     if (x.kind === 'bus') b.extend(ST.machon).extend(ST.gangbyeon).extend(heading(x.k)[1]);
     var sh = s.offsetHeight - down;
-    if (!wide) sh = Math.min(sh, innerHeight * .68);
+    if (!wide) sh = Math.min(sh, innerHeight * .7);
     map.getContainer().querySelector('.leaflet-bottom').style.cssText = wide ? 'left:440px' : 'bottom:' + sh + 'px';
-    map.fitBounds(b, { animate: anim, paddingTopLeft: [wide ? 520 : 92, 96], paddingBottomRight: [wide ? 80 : x.kind === 'bus' ? 116 : 84, wide ? 40 : sh + (x.kind === 'bus' ? 30 : 54)] });
+    map.fitBounds(b, { animate: anim, paddingTopLeft: [wide ? 520 : 92, 112], paddingBottomRight: [wide ? 80 : x.kind === 'bus' ? 116 : 84, wide ? 40 : sh + (x.kind === 'bus' ? 30 : 54)] });
     overlay();
   }
 })();
