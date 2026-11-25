@@ -21,7 +21,7 @@
   // 시연 상황 — 모두 예시값(분)
   var SC = {
     basic: { label: '기본', date: '2025년 11월 1일', clock: '20:50', eta: { machon: [9, 22], gangbyeon: [5, 18] } },
-    hurry: { label: '서두르면 가능', date: '2025년 11월 1일', clock: '21:10', eta: { machon: [7, 20], gangbyeon: [9, 22] } },
+    hurry: { label: '도착이 촉박할 때', date: '2025년 11월 1일', clock: '21:10', eta: { machon: [7, 20], gangbyeon: [9, 22] } },
     ended: { label: '막차 이후', date: '2025년 11월 2일', clock: '00:40', ended: true },
     fail: { label: '조회 실패', date: '2025년 11월 1일', clock: '20:50', fail: true }
   };
@@ -62,7 +62,7 @@
       var m = b.sec == null ? null : Math.floor(b.sec / 60), gap = b.sec == null ? null : b.sec / 60 - x.walk;
       return { min: m, gap: gap, msg: b.msg, isLast: b.isLast,
         cls: gap == null ? '' : gap >= HURRY ? 'ok' : gap >= 0 ? 'hurry' : 'miss',
-        text: gap == null ? '확인 필요' : gap >= HURRY ? '탈 수 있음' : gap >= 0 ? '서두르면 가능' : '놓칠 수 있음' };
+        text: gap == null ? '확인 필요' : gap >= HURRY ? '탈 수 있음' : gap >= 0 ? (x.k === 'gangbyeon' ? '신호에 따라 다름' : '서두르면 가능') : '놓칠 수 있음' };
     });
     var f = -1;
     buses.forEach(function (b, i) { if (f < 0 && (b.cls === 'ok' || b.cls === 'hurry')) f = i; });
@@ -188,6 +188,7 @@
     }).join('') + '</div>';
     var b = a.buses[a.f];
     h += bar(x, b);
+    if (x.k === 'gangbyeon') h += '<p class="small">도보 약 ' + x.walk + '분 · 신호 대기 별도</p>';
     if (b) h += '<p class="small">도착 ' + b.min + '분 − 도보 ' + x.walk + '분 = 여유 ' + Math.floor(b.gap) + '분 (' + HURRY + '분 이상이면 탈 수 있음)' + '</p>';
     else if (a.buses.every(function (y) { return y.cls === 'miss'; })) h += '<p class="note">두 버스 모두 걷는 동안 지나갈 수 있습니다. 그다음 차는 배차 간격' + (a.term ? '(약 ' + a.term + '분)' : '') + '을 참고하거나 지하철을 이용하세요.</p>';
     if (a.asOf) h += '<p class="small">서울시 응답 ' + a.asOf + (b && b.msg ? ' · ' + esc(b.msg) : '') + ' · 30초마다 갱신</p>';
@@ -269,7 +270,7 @@
   // make_exit_counts.py 형식과 스크립트/출차분석.py 형식을 모두 받아 하나로 맞춘다.
   function norm(j) {
     if (j.series) return {
-      date: j.target_date, bins: j.series.map(function (x) { return x.t; }), gates: j.gates, n: (j.comparison_days || []).length, basis: j.comparison_basis, cmpName: '10월 공연 없고 비 오지 않은 날 중앙값', foot: '2025년 토요일은 모두 공연이 있어 평일과 비교',
+      date: j.target_date, bins: j.series.map(function (x) { return x.t; }), gates: j.gates, n: (j.comparison_days || []).length, basis: j.comparison_basis, cmpName: '10월 공연 없고 비 오지 않은 평일 중앙값', foot: '자료가 있는 토요일에는 모두 공연이 있어 평일 13일과 비교',
       by: j.gates.reduce(function (o, g) { o[g] = j.series.map(function (x) { return x.by_gate[g] || 0; }); return o; }, {}),
       cmp: (j.comparison_days || []).length ? { all: j.series.map(function (x) { return x.baseline_median || 0; }) } : null,
       start: j.exit_start && j.exit_start.t, peak: j.exit_peak && j.exit_peak.t, notes: j.notes || []
@@ -288,42 +289,45 @@
       });
   }
   function nice(v) { var p = Math.pow(10, Math.floor(Math.log10(v))), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 3 ? 3 : f <= 5 ? 5 : 10) * p; }
+  function interval(t) { return t + '~' + t.slice(0, 4) + '9'; }
   function chart() {
     var box = $('car'), d = exitData; if (!box) return;
     var v = d.bins.map(function (_, i) { return gate === 'all' ? d.gates.reduce(function (s, g) { return s + (d.by[g][i] || 0); }, 0) : d.by[gate][i] || 0; });
     var c = d.cmp && d.cmp[gate], top = nice(Math.max.apply(null, v.concat(c || [], [1]))), eve = function (i) { return d.bins[i] >= '19:00'; }, late = v.map(function (n, i) { return eve(i) ? n : -1; });
     // 강조하는 막대는 19시 이후 최고(전체는 집계 파일의 exit_peak). 17시대 낮 출차가 더 많을 수 있어 하루 최고와 구분한다.
     var pk = gate === 'all' && d.bins.indexOf(d.peak) >= 0 ? d.bins.indexOf(d.peak) : late.indexOf(Math.max.apply(null, late));
+    var scope = gate === 'all' ? '공원 전체' : gate;
+    var peaks = d.bins.filter(function (_, i) { return eve(i) && v[i] === v[pk]; }).map(interval).join(', ');
     var sum19 = v.reduce(function (s, n, i) { return s + (eve(i) ? n : 0); }, 0);
     var W = 343, H = 220, l = 34, r = 4, t = 34, b = 24, pw = W - l - r, ph = H - t - b, sl = pw / d.bins.length;
-    var y = function (n) { return t + ph - n / top * ph; }, X = function (i) { return l + i * sl; }, s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="10분 단위 출차 대수. 19시 이후 가장 많은 구간 ' + d.bins[pk] + ', ' + v[pk] + '대">';
+    var y = function (n) { return t + ph - n / top * ph; }, X = function (i) { return l + i * sl; }, s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="10분 단위 출차 대수. 19시 이후 가장 많은 구간 ' + interval(d.bins[pk]) + ', ' + v[pk] + '대">';
     [0, .5, 1].forEach(function (f) { s += '<line class="grid" x1="' + l + '" x2="' + (W - r) + '" y1="' + y(top * f) + '" y2="' + y(top * f) + '"/><text x="' + (l - 5) + '" y="' + (y(top * f) + 4) + '" text-anchor="end">' + top * f + '</text>'; });
     d.bins.forEach(function (k, i) {
       s += '<rect class="b' + (i === pk ? ' hi' : '') + '" x="' + (X(i) + .75) + '" y="' + y(v[i]) + '" width="' + Math.max(1, sl - 1.5) + '" height="' + (t + ph - y(v[i])) + '"/>';
       if (k.slice(3) === '00' && +k.slice(0, 2) % 2 === 0) s += '<text x="' + (X(i) + sl / 2) + '" y="' + (H - 6) + '" text-anchor="' + (i ? 'middle' : 'start') + '">' + +k.slice(0, 2) + '시</text>';
     });
     if (c) s += '<polyline class="cmp" points="' + d.bins.map(function (_, i) { return X(i) + ',' + y(c[i] || 0) + ' ' + X(i + 1) + ',' + y(c[i] || 0); }).join(' ') + '"/>';
-    if (gate === 'all') [[d.start, '퇴장 출차 시작', 12], [d.peak, '퇴장 출차 최고', 26]].forEach(function (m) {
+    if (gate === 'all') [[d.start, '출차가 크게 늘어난 첫 10분', 12], [d.peak, '가장 많은 10분', 26]].forEach(function (m) {
       var i = d.bins.indexOf(m[0]); if (i < 0) return;
       var x = X(i) + sl / 2, e = m[2] === 12 ? x > 130 : x > W - 100;
-      s += '<line class="mk" x1="' + x + '" x2="' + x + '" y1="' + (m[2] - 8) + '" y2="' + (t + ph) + '"/><text x="' + (e ? x - 4 : x + 4) + '" y="' + m[2] + '" text-anchor="' + (e ? 'end' : 'start') + '">' + m[1] + ' ' + m[0] + '</text>';
+      s += '<line class="mk" x1="' + x + '" x2="' + x + '" y1="' + (m[2] - 8) + '" y2="' + (t + ph) + '"/><text x="' + (e ? x - 4 : x + 4) + '" y="' + m[2] + '" text-anchor="' + (e ? 'end' : 'start') + '">' + m[1] + '</text>';
     });
     d.bins.forEach(function (_, i) { s += '<rect data-b="' + i + '" x="' + X(i) + '" y="0" width="' + sl + '" height="' + H + '" fill="transparent"/>'; });
     box.innerHTML = '<div class="chips">' + ['all'].concat(d.gates).map(function (g) { return '<button type="button" data-gate="' + esc(g) + '" aria-pressed="' + (g === gate) + '">' + (g === 'all' ? '전체' : esc(g)) + '</button>'; }).join('') + '</div>' +
       '<p class="note">' + (gate === 'all' && d.start && d.peak
-        ? '<b>' + d.start + '</b>부터 출차가 크게 늘어 <b>' + d.bins[pk] + '</b>에 10분당 <b>' + v[pk] + '대</b>로 19시 이후 가장 많았습니다.'
-        : '19시 이후 <b>' + sum19.toLocaleString('ko-KR') + '대</b>가 나갔고, <b>' + d.bins[pk] + '</b>에 10분당 <b>' + v[pk] + '대</b>로 가장 많았습니다.') + '</p>' +
+        ? '출차가 크게 늘어난 첫 10분: ' + interval(d.start) + ' · 공원 전체 ' + v[d.bins.indexOf(d.start)] + '대. 19시 이후 가장 많은 10분: ' + peaks + ' · 각 구간 공원 전체 <b>' + v[pk] + '대</b>.'
+        : scope + ' 19시 이후 <b>' + sum19.toLocaleString('ko-KR') + '대</b>가 나갔고, <b>' + interval(d.bins[pk]) + '</b>에 10분당 <b>' + v[pk] + '대</b>로 가장 많았습니다.') + '</p>' +
       '<div class="chart">' + s + '</svg><div class="tip"></div></div><p class="legend"><span><i></i>' + esc(d.date) + ' 10분당 출차 대수</span>' + (c ? '<span><i class="c"></i>' + esc(d.cmpName) + '</span>' : '') + '</p>' +
       (d.foot ? '<p class="small">' + esc(d.foot) + (c ? '' : ' (비교선은 전체에만 있습니다)') + '</p>' : '') +
       '<p class="small">자료: 한국체육산업개발 올림픽공원 입출차정보(전체구역)</p>' +
       '<details><summary>집계 방법</summary>' + (d.basis ? '<p>비교 기준: ' + esc(d.basis) + '.</p>' : '') + d.notes.map(function (n) { return '<p>' + esc(n) + '.</p>'; }).join('') +
       (d.foot ? '<p>비교일은 평일이라 18시 전후에 퇴근 시간 출차가 섞여 있습니다.</p>' : '') + '<p>공연의 실제 종료 시각은 확인되지 않아 가로축은 시계 시각입니다.</p></details>' +
-      '<details><summary>표로 보기</summary><table><thead><tr><th>시각</th><th>출차</th>' + (c ? '<th>비교</th>' : '') + '</tr></thead><tbody>' + d.bins.map(function (k, i) { return '<tr><td>' + k + '</td><td>' + v[i] + '</td>' + (c ? '<td>' + c[i] + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table></details>';
+      '<details><summary>표로 보기</summary><table><thead><tr><th>시각</th><th>출차</th>' + (c ? '<th>비교</th>' : '') + '</tr></thead><tbody>' + d.bins.map(function (k, i) { return '<tr><td>' + interval(k) + '</td><td>' + v[i] + '</td>' + (c ? '<td>' + c[i] + '</td>' : '') + '</tr>'; }).join('') + '</tbody></table></details>';
     var ch = box.querySelector('.chart'), tip = box.querySelector('.tip');
     var show = function (e) {
       var k = e.target.dataset && e.target.dataset.b; if (k == null) return;
       var rc = ch.getBoundingClientRect(), tr = e.target.getBoundingClientRect();
-      tip.textContent = d.bins[k] + ' · ' + v[k] + '대' + (c ? ' (비교 ' + c[k] + '대)' : '');
+      tip.textContent = interval(d.bins[k]) + ' · ' + scope + ' ' + v[k] + '대' + (c ? ' (비교 ' + c[k] + '대)' : '');
       tip.style.display = 'block'; tip.style.top = '60px';
       tip.style.left = Math.max(70, Math.min(rc.width - 70, tr.left - rc.left + tr.width / 2)) + 'px';
     };
