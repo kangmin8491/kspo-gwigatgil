@@ -156,16 +156,21 @@
       (a.last && b && b.min != null ? '<span class="miss1">막차 <b>' + a.last + '</b> · ' + a.lastNote + '</span>' : '');
     return h + '</button>';
   }
+  function place(x) { return x.kind === 'bus' ? x.o.stop_name : x.name; }
   function list() {
     var box = $('list'); if (!box) return;
     var had = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.i : null;
     box.innerHTML = opts.map(row).join('');
+    // 길찾기는 만들지 않는다. 고른 방면의 역·정류장 이름으로 네이버 지도 검색을 새 탭에 연다.
+    var m = $('more'), u = 'https://map.naver.com/p/search/' + encodeURIComponent(place(opts[sel]));
+    if (!m.firstChild || m.firstChild.href !== u) m.innerHTML = link(u, '목적지까지 전체 경로는 지도 앱에서 ↗');
     if (had != null) box.querySelector('[data-i="' + had + '"]').focus({ preventScroll: true });
   }
   function home() {
     $('view').innerHTML = '<div class="event"><p><b>KSPO DOME</b> 아이브 서울 2회차 18:00</p><button type="button" data-go="#/event" aria-label="공연 바꾸기">바꾸기</button></div>' +
-      '<h1 tabindex="-1">어느 쪽으로 가세요?</h1><div id="list" role="group" aria-label="가는 방면"></div>' +
-      '<button type="button" class="goto" data-go="#/car"><b>자가용으로 오셨나요?</b><span>출차가 몰린 시각 보기 →</span></button>' +
+      '<h1 tabindex="-1">어느 쪽으로 가세요?</h1><p class="lead">KSPO DOME 현장 귀가 안내 · 목적지 입력 없이 방면만 고르세요</p>' +
+      '<div id="list" role="group" aria-label="가는 방면"></div><p class="more" id="more"></p>' +
+      '<button type="button" class="goto" data-go="#/car"><b>자가용으로 오셨나요?</b><span>게이트별 출차 보기 →</span></button>' +
       scenario() + '<p class="foot">' + (mode === 'demo' ? '버스 도착 시간은 시연용 예시값입니다. 막차는 2026년 11월 24일 서울시 조회값입니다. ' : '실시간 보기에서도 공연은 시연 회차로 고정됩니다. ') +
       '도보는 지도 경로 추정이며 신호 대기와 공연장 안에서 걷는 시간은 빠져 있습니다.<br>자료: 한국체육산업개발 · 서울특별시 · OpenStreetMap</p>';
     list();
@@ -280,7 +285,7 @@
       cmp: c ? Object.assign({ all: sum(c.counts) }, c.counts) : null, start: j.markers && j.markers.surge_start, peak: j.markers && j.markers.peak, notes: j.notes || [] };
   }
   function car() {
-    $('view').innerHTML = '<button type="button" class="back" data-go="#/">← 돌아가기</button><h1 tabindex="-1">출차가 몰린 시각</h1><div class="pad" id="car"><p class="note">불러오는 중…</p></div>';
+    $('view').innerHTML = '<button type="button" class="back" data-go="#/">← 돌아가기</button><h1 tabindex="-1">공연일 게이트별 출차 (운영 참고)</h1><p class="lead">관람객: 어느 게이트가 몰렸는지 · 운영자: 안내 인력 배치 참고</p><div class="pad" id="car"><p class="note">불러오는 중…</p></div>';
     if (exitData) return chart();
     fetch('data/exit_counts.json', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
       .then(function (j) { exitData = norm(j); chart(); })
