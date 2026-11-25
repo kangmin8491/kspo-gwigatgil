@@ -22,6 +22,9 @@ const SHOTS = [
   ['지하철_4번출구.png', '#/go/subway-olympic', 'dark', 0],
   ['지하철_한성백제역.png', '#/go/subway-hanseong', 'dark'],
   ['자가용_출차.png', '#/car', 'dark'],
+  ['자가용_출차_동2문.png', '#/car', 'dark', 'gate'],
+  ['라이트_자가용_출차.png', '#/car', 'light'],
+  ['작은화면_자가용_출차.png', '#/car', 'dark', null, 360, 640],
   ['상태_서두르면가능.png', '?s=hurry#/go/bus-gangbyeon', 'dark'],
   ['상태_막차이후.png', '?s=ended#/go/bus-machon', 'dark'],
   ['상태_막차이후_방면선택.png', '?s=ended#/', 'dark'],
@@ -77,7 +80,9 @@ for (const [file, q, scheme, act = null, width = 375, height = 812] of SHOTS) {
     if (await evaluate(`!!document.querySelector('.m-start') && !!document.querySelector('#view h1')`).catch(() => false)) break;
   }
   await evaluate('document.fonts.ready.then(() => 1)');
+  if (q.includes('#/car')) await sleep(600);
   if (typeof act === 'number') await evaluate(`(() => { const v = document.getElementById('view'); v.scrollTop += v.querySelectorAll('h2')[${act}].getBoundingClientRect().top - v.getBoundingClientRect().top - 12; })()`);
+  if (act === 'gate') await evaluate(`document.querySelector('[data-gate="동2문"]').click()`);
   if (act === 'fold') await evaluate(`document.getElementById('cta').click()`);
   await sleep(1300);
   const info = await evaluate(`JSON.stringify({
