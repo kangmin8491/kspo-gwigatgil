@@ -1,7 +1,7 @@
 {
   "name": "kspo-gwigatgil-web",
   "private": true,
-  "description": "공연 끝, 귀갓길 — KSPO DOME 관람객 귀가 안내 시연용 모바일 웹",
+  "description": "귀갓길 — KSPO DOME 관람객 귀가 안내 시연용 모바일 웹",
   "scripts": {
     "dev": "wrangler pages dev public --port 8788",
     "deploy": "wrangler pages deploy public --project-name kspo-gwigatgil --profile kspo",

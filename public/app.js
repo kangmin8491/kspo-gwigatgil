@@ -1,4 +1,4 @@
-/* 공연 끝, 귀갓길 — 시연용 모바일 웹
+/* 귀갓길 — 시연용 모바일 웹
  * 화면: #/ 방면 고르기 · #/go/<id> 탑승 위치 · #/event 공연 고르기 · #/car 출차 그래프
  * 주소 인자: ?mode=live (실시간), ?s=basic|hurry|ended|fail (시연 상황, 예시값)
  */
@@ -156,20 +156,16 @@
       (a.last && b && b.min != null ? '<span class="miss1">막차 <b>' + a.last + '</b> · ' + a.lastNote + '</span>' : '');
     return h + '</button>';
   }
-  function place(x) { return x.kind === 'bus' ? x.o.stop_name : x.name; }
   function list() {
     var box = $('list'); if (!box) return;
     var had = document.activeElement && box.contains(document.activeElement) ? document.activeElement.dataset.i : null;
     box.innerHTML = opts.map(row).join('');
-    // 길찾기는 만들지 않는다. 고른 방면의 역·정류장 이름으로 네이버 지도 검색을 새 탭에 연다.
-    var m = $('more'), u = 'https://map.naver.com/p/search/' + encodeURIComponent(place(opts[sel]));
-    if (!m.firstChild || m.firstChild.href !== u) m.innerHTML = link(u, '목적지까지 전체 경로는 지도 앱에서 ↗');
     if (had != null) box.querySelector('[data-i="' + had + '"]').focus({ preventScroll: true });
   }
   function home() {
     $('view').innerHTML = '<div class="event"><p><b>KSPO DOME</b> 아이브 서울 2회차 18:00</p><button type="button" data-go="#/event" aria-label="공연 바꾸기">바꾸기</button></div>' +
       '<h1 tabindex="-1">어느 쪽으로 가세요?</h1><p class="lead">KSPO DOME 현장 귀가 안내 · 목적지 입력 없이 방면만 고르세요</p>' +
-      '<div id="list" role="group" aria-label="가는 방면"></div><p class="more" id="more"></p>' +
+      '<div id="list" role="group" aria-label="가는 방면"></div>' +
       '<button type="button" class="goto" data-go="#/car"><b>자가용으로 오셨나요?</b><span>게이트별 출차 보기 →</span></button>' +
       scenario() + '<p class="foot">' + (mode === 'demo' ? '버스 도착 시간은 시연용 예시값입니다. 막차는 2026년 11월 24일 서울시 조회값입니다. ' : '실시간 보기에서도 공연은 시연 회차로 고정됩니다. ') +
       '도보는 지도 경로 추정이며 신호 대기와 공연장 안에서 걷는 시간은 빠져 있습니다.<br>자료: 한국체육산업개발 · 서울특별시 · OpenStreetMap</p>';
@@ -468,7 +464,7 @@
     if (!map || !opts.length) return;
     over.clearLayers();
     var x = opts[sel], path = x.line.map(ll), z = map.getZoom();
-    mark([37.51915, 127.12735], 'm-text venue', 'KSPO DOME').addTo(over);
+    var venue = mark([37.51915, 127.12735], 'm-text venue', 'KSPO DOME').addTo(over);
     mark([37.5199, 127.1330], 'm-text road', '양재대로').addTo(over);
     mark([37.5161, 127.1272], 'm-text', '올림픽홀').setZIndexOffset(-1000).addTo(over);
     // 도보 점선
@@ -476,8 +472,11 @@
     L.polyline(path, { renderer: sv, color: css('--walk-case'), weight: 9, opacity: .55, lineCap: 'round', interactive: false }).addTo(over);
     L.polyline(path, { renderer: sv, color: css('--walk'), weight: 6, dashArray: '0.1 10', lineCap: 'round', interactive: false }).addTo(over);
     var st = path[0];
-    mark(st, 'm-start').addTo(over);
-    mark(st, 'm-text m-from at-l', '88서울올림픽<br>조각 앞').addTo(over);
+    var from = [mark(st, 'm-start').addTo(over), mark(st, 'm-text m-from at-l', '88서울올림픽<br>조각 앞').addTo(over)];
+    // 멀리 축소하면 출발점 라벨이 KSPO DOME 라벨에 닿는다. 겹치면 출발점을 남기고 KSPO DOME을 숨긴다.
+    var vr = venue.getElement().firstChild.getBoundingClientRect();
+    if (from.some(function (m) { var r = m.getElement().firstChild.getBoundingClientRect(); return vr.left < r.right + 4 && r.left < vr.right + 4 && vr.top < r.bottom + 2 && r.top < vr.bottom + 2; }))
+      venue.getElement().style.display = 'none';
     var exits = { '4': [37.516432, 127.130784] };
     if (x.name === '올림픽공원역') mark(exits['4'], 'm-exit on', '4').addTo(over);
     if (x.kind === 'bus') {

@@ -9,10 +9,9 @@ const BASE = process.argv[2] || 'http://127.0.0.1:8788';
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const OUT = process.argv[3] || join(dirname(fileURLToPath(import.meta.url)), '..', 'screenshots');
 const PORT = 9334;
-// [파일, 주소, 색 모드, 동작, 폭, 높이]  동작: 'fold' 시트 접기, 'more' 지도 앱 링크까지 스크롤, 숫자 = 그 순서의 h2가 보이게 시트 스크롤
+// [파일, 주소, 색 모드, 동작, 폭, 높이]  동작: 'fold' 시트 접기, 숫자 = 그 순서의 h2가 보이게 시트 스크롤
 const SHOTS = [
   ['01_방면선택.png', '#/', 'dark'],
-  ['방면선택_지도앱링크.png', '#/', 'dark', 'more'],
   ['02_버스_마천동.png', '#/go/bus-machon', 'dark'],
   ['03_버스_길어느쪽.png', '#/go/bus-machon', 'dark', 0],
   ['04_지하철_올림픽공원역.png', '#/go/subway-olympic', 'dark'],
@@ -84,7 +83,6 @@ for (const [file, q, scheme, act = null, width = 375, height = 812] of SHOTS) {
   if (q.includes('#/car')) await sleep(600);
   if (typeof act === 'number') await evaluate(`(() => { const v = document.getElementById('view'); v.scrollTop += v.querySelectorAll('h2')[${act}].getBoundingClientRect().top - v.getBoundingClientRect().top - 12; })()`);
   if (act === 'gate') await evaluate(`document.querySelector('[data-gate="동2문"]').click()`);
-  if (act === 'more') await evaluate(`document.getElementById('more').scrollIntoView({ block: 'end' })`);
   if (act === 'fold') await evaluate(`document.getElementById('cta').click()`);
   await sleep(1300);
   const info = await evaluate(`JSON.stringify({

@@ -74,8 +74,6 @@ h1 { font-size: var(--fs-title); font-weight: var(--fw-heavy); line-height: var(
 
 h1 + .lead { margin-top: calc(var(--sp-1) * -1); }
 .lead { padding: 0 var(--sp-2) var(--sp-2); font-size: 13px; letter-spacing: -.02em; line-height: 1.45; color: var(--text-2); word-break: keep-all; }
-.more { padding: 0 var(--sp-2); font-size: 13px; color: var(--text-2); }
-.more a { min-height: var(--tap); display: inline-flex; align-items: center; text-decoration: underline; text-underline-offset: 3px; }
 
 .row {
   display: grid; grid-template-columns: 1fr auto; column-gap: var(--sp-3); align-items: center; width: 100%;
