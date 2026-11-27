@@ -12,6 +12,17 @@ const PORT = 9334;
 // [파일, 주소, 색 모드, 동작, 폭, 높이]  동작: 'fold' 시트 접기, 숫자 = 그 순서의 h2가 보이게 시트 스크롤
 const SHOTS = [
   ['01_방면선택.png', '#/', 'dark'],
+  ['방면선택_EN.png', '?lang=en#/', 'dark'],
+  ['작은화면_방면선택_EN.png', '?lang=en#/', 'dark', null, 360, 640],
+  ['정류소확인_맞음.png', '#/go/bus-gangbyeon?at=24245', 'dark'],
+  ['작은화면_정류소확인_맞음.png', '#/go/bus-gangbyeon?at=24245', 'dark', null, 360, 640],
+  ['정류소확인_틀림.png', '#/go/bus-gangbyeon?at=24244', 'dark'],
+  ['작은화면_정류소확인_틀림.png', '#/go/bus-gangbyeon?at=24244', 'dark', null, 360, 640],
+  ['정류소확인_틀림_EN.png', '?lang=en#/go/bus-gangbyeon?at=24244', 'dark'],
+  ['작은화면_정류소확인_틀림_EN.png', '?lang=en#/go/bus-gangbyeon?at=24244', 'dark', null, 360, 640],
+  ['정류소확인_틀림_지도.png', '#/go/bus-gangbyeon?at=24244', 'dark', 'fold'],
+  ['정류소확인_번호못찾음.png', '#/go/bus-gangbyeon?at=none', 'dark'],
+  ['자가용_출차_EN.png', '?lang=en#/car', 'dark'],
   ['02_버스_마천동.png', '#/go/bus-machon', 'dark'],
   ['03_버스_길어느쪽.png', '#/go/bus-machon', 'dark', 0],
   ['04_지하철_올림픽공원역.png', '#/go/subway-olympic', 'dark'],

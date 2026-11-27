@@ -54,6 +54,12 @@ a { color: inherit; text-underline-offset: 3px; }
 .clock { display: flex; gap: var(--sp-2); align-items: center; font-weight: var(--fw-bold); }
 .clock b { font-size: var(--fs-note); padding: 2px 6px; border-radius: 4px; background: var(--surface-2); color: var(--text); }
 .live { color: var(--text-2); min-height: var(--tap); font-weight: var(--fw-medium); }
+.tools { display: flex; align-items: center; gap: var(--sp-3); flex: none; }
+.lang { min-height: var(--tap); min-width: 32px; font-size: var(--fs-note); font-weight: var(--fw-bold); color: var(--text); }
+.lang::before { content: ""; display: inline-block; width: 1px; height: 14px; margin-right: var(--sp-3); background: var(--line); vertical-align: -2px; }
+.clock { min-width: 0; white-space: nowrap; }
+html[lang="en"] .num .u, html[lang="en"] .eta .u { margin-left: 3px; }
+html[lang="en"] .eta .u.pre { margin: 0 3px 0 0; }
 
 /* 바텀시트 */
 .sheet {
@@ -224,4 +230,35 @@ th:first-child, td:first-child { text-align: left; }
 /* 세로가 짧은 화면: 지도가 너무 작아지지 않게 시트를 낮춘다 */
 @media (max-width: 767px) and (max-height: 700px) {
   .sheet, .sheet[data-view="home"] { max-height: 60dvh; }
+}
+
+/* 정류소 확인 */
+.pick { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin-top: var(--sp-3); }
+.pick button { min-height: 64px; padding: var(--sp-2); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); text-align: center; font-size: var(--fs-sub); font-weight: var(--fw-bold); }
+.pick button small { display: block; font-size: var(--fs-note); font-weight: var(--fw-medium); color: var(--text-2); }
+.pick button b { display: block; font-size: 24px; font-weight: var(--fw-heavy); letter-spacing: .02em; }
+.pick button.wide { grid-column: 1 / -1; min-height: var(--tap); }
+.pick button[aria-pressed="true"] { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
+.pick button[aria-pressed="true"] small { color: inherit; opacity: .75; }
+.verdict { margin-top: var(--sp-3); padding: var(--sp-3) var(--sp-3) var(--sp-4); border-radius: var(--r-row); border: 2px solid var(--line-strong); }
+.verdict.ok { border-color: var(--bus); }
+.verdict .head { font-size: var(--fs-title); font-weight: var(--fw-heavy); line-height: var(--lh-tight); letter-spacing: -.02em; }
+.verdict.ok .head { color: var(--bus-text); }
+.verdict #arr { margin-top: var(--sp-3); }
+.verdict .to { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); margin: var(--sp-3) 0 var(--sp-1); font-size: var(--fs-sub); color: var(--text-2); }
+.verdict .to span:first-child { width: 100%; font-weight: var(--fw-bold); color: var(--text); }
+.plate-big { display: inline-block; padding: 2px 14px; border-radius: var(--r-badge); background: var(--bus); color: var(--bus-on); font-size: 36px; font-weight: var(--fw-heavy); letter-spacing: .02em; line-height: 1.2; }
+.verdict .where { margin-top: var(--sp-3); }
+.verdict .where dt { font-size: var(--fs-body); font-weight: var(--fw-heavy); color: var(--text); }
+.verdict .where small { display: block; font-size: var(--fs-sub); font-weight: var(--fw-regular); color: var(--text-2); }
+.check .links { margin-top: var(--sp-2); }
+.m-ring { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--bus-text); }
+.m-me { width: 16px; height: 16px; border-radius: 50%; background: var(--text); border: 3px solid var(--bg); box-shadow: 0 0 0 2px var(--text); }
+.m-tag.me { background: var(--text); color: var(--bg); }
+.m-tag.me b { font-weight: var(--fw-heavy); }
+
+/* 아주 좁은 화면(320px): 정류소 확인 지도에서 양옆 정류장 라벨이 화면 안에 들어오게 */
+@media (max-width: 340px) {
+  .m-tag { font-size: 11px; padding: 4px 6px; }
+  .m-tag.on b { font-size: 14px; }
 }
