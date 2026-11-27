@@ -88,9 +88,13 @@
   }).catch(function () { $('view').innerHTML = '<p class="pad">' + T('동선 자료를 불러오지 못했습니다. 새로고침해 주세요.', 'Could not load the route data. Please refresh.') + '</p>'; });
 
   // ---------- 버스 도착 ----------
+  // 정류소 확인에서 맞는 번호를 눌렀으면 이미 정류소에 서 있다: 도보 시간을 빼지 않는다
+  function here(x) { return view === 'go' && x.kind === 'bus' && at === x.o.ars_id; }
   function pack(x, list) { // list: [{sec,msg,isLast}]
+    var on = here(x);
     var buses = list.slice(0, 2).map(function (b) {
-      var m = b.sec == null ? null : Math.floor(b.sec / 60), gap = b.sec == null ? null : b.sec / 60 - x.walk;
+      var m = b.sec == null ? null : Math.floor(b.sec / 60), gap = b.sec == null ? null : b.sec / 60 - (on ? 0 : x.walk);
+      if (on && gap != null) return { min: m, gap: gap, msg: b.msg, isLast: b.isLast, cls: 'ok', text: T('탈 수 있음', 'You can make it') };
       return { min: m, gap: gap, msg: b.msg, isLast: b.isLast,
         cls: gap == null ? '' : gap >= HURRY ? 'ok' : gap >= 0 ? 'hurry' : 'miss',
         text: gap == null ? T('확인 필요', 'Check') : gap >= HURRY ? T('탈 수 있음', 'You can make it') : gap >= 0 ? (x.k === 'gangbyeon' ? T('신호에 따라 다름', 'Depends on the signal') : T('서두르면 가능', 'Hurry')) : T('놓칠 수 있음', 'May miss') };
@@ -245,6 +249,11 @@
         '<span class="v ' + b.cls + '">' + b.text + '</span></div>';
     }).join('') + '</div>';
     var b = a.buses[a.f];
+    if (here(x)) {
+      h += '<p class="small">' + T('정류소에 서 있으니 걷는 시간 없이 도착 시간만으로 판정했습니다.', 'You are at the stop, so only the arrival time is counted, with no walking time.') + '</p>';
+      if (a.asOf) h += '<p class="small">' + T('서울시 응답 ', 'Seoul data at ') + a.asOf + (b && b.msg ? ' · ' + esc(busMsg(b.msg)) : '') + T(' · 30초마다 갱신', ' · refreshes every 30 s') + '</p>';
+      return h + last;
+    }
     h += bar(x, b);
     if (x.k === 'gangbyeon') h += '<p class="small">' + T('도보 약 ' + x.walk + '분 · 신호 대기 별도', 'About ' + x.walk + ' min walk, plus waiting at the signal') + '</p>';
     if (b) h += '<p class="small">' + T('도착 ' + b.min + '분 − 도보 ' + x.walk + '분 = 여유 ' + Math.floor(b.gap) + '분 (' + HURRY + '분 이상이면 탈 수 있음)',
